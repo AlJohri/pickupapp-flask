@@ -1,8 +1,11 @@
-from flask import Flask
+from flask import Flask, jsonify, abort
 
 # flask-peewee bindings
 from flask_peewee.db import Database
 from flask_peewee.rest import RestAPI, RestResource
+from flask.ext.cors import cross_origin
+# Set up Cross Origin Requests
+
 
 # configure our database
 DATABASE = {
@@ -22,22 +25,41 @@ api = RestAPI(app)
 import datetime
 from peewee import *
 
+example = [
+	{
+		'first': 1,
+		'second': 2
+	},
+	{
+		'third': 1,
+		'fourth': 2
+	},
+	{
+		'fifth': 1,
+		'sixth': 2
+	}
+]
+
 class User(db.Model):
+	#__tablename__ = "users"
     email = TextField(primary_key=True)
     name = TextField()
     password = TextField()
 
 class Sport(db.Model):
+	#__tablename__ = "sports"
     sport_id = IntegerField(primary_key=True)
     title = TextField()
     created = DateTimeField(default=datetime.datetime.now)
 
 class Location(db.Model):
+	#__tablename__ = "locations"
     location_id = IntegerField(primary_key=True)
     title = TextField()
     created = DateTimeField(default=datetime.datetime.now)
 
 class Game(db.Model):
+	#__tablename__ = "games"
     game_id = IntegerField(primary_key=True)
     title = TextField()
     description = TextField()
@@ -76,6 +98,22 @@ api.register(Location, LocationResource)
 api.register(Game, GameResource)
 
 api.setup()
+
+@app.route('/')
+@cross_origin('localhost:9000')
+def index():
+	return 'HELLO WORLD!'
+
+#@app.route('/games', methods=['GET','POST'])
+
+@app.errorhandler(404)
+def not_found(error):
+	return 'NOT FOUND	:('
+
+@app.route('/games/<int:user_id>', methods=['GET','POST','PUT','DELETE'])
+def getexample(user_id):
+	abort(404)
+	return jsonify(example[0],id=user_id)
 
 if __name__ == '__main__':
     app.run()
